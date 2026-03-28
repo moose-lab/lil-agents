@@ -381,16 +381,13 @@ class WalkerCharacter {
         titleLabel.frame = NSRect(x: 12, y: 6, width: popoverWidth - 80, height: 16)
         titleBar.addSubview(titleLabel)
 
-        // Copy button in title bar
-        let copyBtn = NSButton(frame: NSRect(x: popoverWidth - 60, y: 4, width: 48, height: 20))
-        copyBtn.title = "copy"
-        copyBtn.font = NSFont.monospacedSystemFont(ofSize: 9, weight: .regular)
+        // Copy button in title bar (icon only)
+        let copyBtn = NSButton(frame: NSRect(x: popoverWidth - 28, y: 5, width: 16, height: 16))
+        copyBtn.image = NSImage(systemSymbolName: "square.on.square", accessibilityDescription: "Copy")
+        copyBtn.imageScaling = .scaleProportionallyDown
         copyBtn.bezelStyle = .inline
         copyBtn.isBordered = false
-        copyBtn.wantsLayer = true
-        copyBtn.layer?.backgroundColor = t.accentColor.withAlphaComponent(0.12).cgColor
-        copyBtn.layer?.cornerRadius = 4
-        copyBtn.contentTintColor = t.accentColor
+        copyBtn.contentTintColor = t.titleText.withAlphaComponent(0.75)
         copyBtn.target = self
         copyBtn.action = #selector(copyLastResponseFromButton)
         titleBar.addSubview(copyBtn)
@@ -485,20 +482,15 @@ class WalkerCharacter {
         "on it!", "gimme a sec", "brb", "processing...",
         "hang tight", "just a moment", "figuring it out",
         "crunching...", "reading...", "looking...",
-        "cooking...", "vibing...", "in the zone", "nearly there",
-        "hold that thought", "digging in...", "big brain time",
-        "connecting dots", "hold on...", "give me a sec",
-        "on it like a bonnet", "chef's kiss incoming",
-        "loading genius...", "don't rush me", "worth the wait",
-        "good question...", "let me think", "fascinating...",
-        "🤔...", "calculating...", "assembling thoughts"
+        "cooking...", "vibing...", "digging in",
+        "connecting dots", "give me a sec",
+        "don't rush me", "calculating...", "assembling\u{2026}"
     ]
 
     private static let completionPhrases = [
         "done!", "all set!", "ready!", "here you go", "got it!",
-        "finished!", "ta-da!", "voila!", "boom!", "easy.",
-        "nailed it!", "there ya go!", "check it out!", "fresh out the oven",
-        "hope that helps!", "your wish, granted", "cooking complete 🍳"
+        "finished!", "ta-da!", "voila!",
+        "boom!", "there ya go!", "check it out!"
     ]
 
     private var lastPhraseUpdate: CFTimeInterval = 0
