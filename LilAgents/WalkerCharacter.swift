@@ -52,6 +52,8 @@ class WalkerCharacter {
     var currentStreamingText = ""
     weak var controller: LilAgentsController?
     var themeOverride: PopoverTheme?
+    var providerOverride: AgentProvider?
+    var effectiveProvider: AgentProvider { providerOverride ?? AgentProvider.current }
     var isAgentBusy: Bool { session?.isBusy ?? false }
     var thinkingBubbleWindow: NSWindow?
     private(set) var isManuallyVisible = true
@@ -258,9 +260,10 @@ class WalkerCharacter {
         hideBubble()
 
         if session == nil {
-            let newSession = AgentProvider.current.createSession()
+            let provider = effectiveProvider
+            let newSession = provider.createSession()
             session = newSession
-            wireSession(newSession)
+            wireSession(newSession, providerName: provider.displayName)
             newSession.start()
         }
 
@@ -375,7 +378,7 @@ class WalkerCharacter {
         titleBar.layer?.backgroundColor = t.titleBarBg.cgColor
         container.addSubview(titleBar)
 
-        let titleLabel = NSTextField(labelWithString: t.titleString)
+        let titleLabel = NSTextField(labelWithString: t.titleString(for: effectiveProvider))
         titleLabel.font = t.titleFont
         titleLabel.textColor = t.titleText
         titleLabel.frame = NSRect(x: 12, y: 6, width: popoverWidth - 80, height: 16)
@@ -400,6 +403,7 @@ class WalkerCharacter {
         let terminal = TerminalView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight - 29))
         terminal.characterColor = characterColor
         terminal.themeOverride = themeOverride
+        terminal.providerOverride = providerOverride
         terminal.autoresizingMask = [.width, .height]
         terminal.onSendMessage = { [weak self] message in
             self?.session?.send(message: message)

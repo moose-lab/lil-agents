@@ -51,17 +51,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         soundItem.state = .on
         menu.addItem(soundItem)
 
-        // Provider submenu
-        let providerItem = NSMenuItem(title: "Provider", action: nil, keyEquivalent: "")
-        let providerMenu = NSMenu()
-        for (i, provider) in AgentProvider.allCases.enumerated() {
-            let item = NSMenuItem(title: provider.displayName, action: #selector(switchProvider(_:)), keyEquivalent: "")
-            item.tag = i
-            item.state = provider == AgentProvider.current ? .on : .off
-            providerMenu.addItem(item)
+        // Per-character provider submenus
+        let charNames = ["Bruce", "Jazz"]
+        for (charIdx, charName) in charNames.enumerated() {
+            let charProvider = controller?.characters.indices.contains(charIdx) == true
+                ? (controller!.characters[charIdx].providerOverride ?? AgentProvider.current)
+                : AgentProvider.current
+            let providerItem = NSMenuItem(title: "\(charName) Provider", action: nil, keyEquivalent: "")
+            let providerMenu = NSMenu()
+            for (provIdx, provider) in AgentProvider.allCases.enumerated() {
+                let item = NSMenuItem(title: provider.displayName, action: #selector(switchProvider(_:)), keyEquivalent: "")
+                item.tag = charIdx * 100 + provIdx
+                item.state = provider == charProvider ? .on : .off
+                providerMenu.addItem(item)
+            }
+            providerItem.submenu = providerMenu
+            menu.addItem(providerItem)
         }
-        providerItem.submenu = providerMenu
-        menu.addItem(providerItem)
 
         // Theme submenu
         let themeItem = NSMenuItem(title: "Style", action: nil, keyEquivalent: "")
@@ -143,31 +149,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func switchProvider(_ sender: NSMenuItem) {
-        let idx = sender.tag
+        let charIdx = sender.tag / 100
+        let provIdx = sender.tag % 100
         let allProviders = AgentProvider.allCases
-        guard idx < allProviders.count else { return }
-        AgentProvider.current = allProviders[idx]
+        guard provIdx < allProviders.count,
+              let chars = controller?.characters,
+              charIdx < chars.count else { return }
+
+        let char = chars[charIdx]
+        char.providerOverride = allProviders[provIdx]
 
         if let providerMenu = sender.menu {
             for item in providerMenu.items {
-                item.state = item.tag == idx ? .on : .off
+                item.state = (item.tag % 100) == provIdx ? .on : .off
             }
         }
 
-        // Terminate existing sessions and clear UI so title/placeholder update
-        controller?.characters.forEach { char in
-            char.session?.terminate()
-            char.session = nil
-            if char.isIdleForPopover {
-                char.closePopover()
-            }
-            // Always clear popover/bubble so they rebuild with new provider title/placeholder
-            char.popoverWindow?.orderOut(nil)
-            char.popoverWindow = nil
-            char.terminalView = nil
-            char.thinkingBubbleWindow?.orderOut(nil)
-            char.thinkingBubbleWindow = nil
+        // Terminate existing session and clear UI so title/placeholder update
+        char.session?.terminate()
+        char.session = nil
+        if char.isIdleForPopover {
+            char.closePopover()
         }
+        char.popoverWindow?.orderOut(nil)
+        char.popoverWindow = nil
+        char.terminalView = nil
+        char.thinkingBubbleWindow?.orderOut(nil)
+        char.thinkingBubbleWindow = nil
     }
 
     @objc func switchDisplay(_ sender: NSMenuItem) {

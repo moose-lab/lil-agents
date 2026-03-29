@@ -30,6 +30,9 @@ class LilAgentsController {
         char1.flipXOffset = 0
         char2.flipXOffset = -9
 
+        char1.providerOverride = .claude
+        char2.providerOverride = .codex
+
         char1.positionProgress = 0.3
         char2.positionProgress = 0.7
 
@@ -135,6 +138,8 @@ class LilAgentsController {
 
     // MARK: - Display Link
 
+    private var tickTimer: Timer?
+
     private func startDisplayLink() {
         CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
         guard let displayLink = displayLink else { return }
@@ -150,6 +155,11 @@ class LilAgentsController {
         CVDisplayLinkSetOutputCallback(displayLink, callback,
                                        Unmanaged.passUnretained(self).toOpaque())
         CVDisplayLinkStart(displayLink)
+
+        // Timer fallback: CVDisplayLink dispatch may not deliver on all launch methods
+        tickTimer = Timer.scheduledTimer(withTimeInterval: 1.0/60.0, repeats: true) { [weak self] _ in
+            self?.tick()
+        }
     }
 
     var activeScreen: NSScreen? {

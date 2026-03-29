@@ -70,6 +70,9 @@ class TerminalView: NSView {
 
     var characterColor: NSColor?
     var themeOverride: PopoverTheme?
+    var providerOverride: AgentProvider? {
+        didSet { updatePlaceholder() }
+    }
     var theme: PopoverTheme {
         var t = themeOverride ?? PopoverTheme.current
         if let color = characterColor { t = t.withCharacterColor(color) }
@@ -137,13 +140,25 @@ class TerminalView: NSView {
         paddedCell.fieldBackgroundColor = nil
         paddedCell.fieldCornerRadius = 0
         paddedCell.placeholderAttributedString = NSAttributedString(
-            string: AgentProvider.current.inputPlaceholder,
+            string: (providerOverride ?? AgentProvider.current).inputPlaceholder,
             attributes: [.font: t.font, .foregroundColor: t.textDim]
         )
         inputField.cell = paddedCell
         inputField.target = self
         inputField.action = #selector(inputSubmitted)
         addSubview(inputField)
+    }
+
+    func updatePlaceholder() {
+        let t = theme
+        let provider = providerOverride ?? AgentProvider.current
+        if let cell = inputField.cell as? PaddedTextFieldCell {
+            cell.placeholderAttributedString = NSAttributedString(
+                string: provider.inputPlaceholder,
+                attributes: [.font: t.font, .foregroundColor: t.textDim]
+            )
+            inputField.needsDisplay = true
+        }
     }
 
     // MARK: - Input
