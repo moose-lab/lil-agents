@@ -25,6 +25,7 @@ let package = Package(
                 .copy("Sounds"),
                 .copy("walk-bruce-01.mov"),
                 .copy("walk-jazz-01.mov"),
+                .copy("walk-luna-01.mov"),
             ]
         ),
     ]

@@ -30,19 +30,33 @@ class LilAgentsController {
         char1.flipXOffset = 0
         char2.flipXOffset = -9
 
+        let char3 = WalkerCharacter(videoName: "walk-luna-01")
+        char3.accelStart = 3.2
+        char3.fullSpeedStart = 3.9
+        char3.decelStart = 7.5
+        char3.walkStop = 8.25
+        char3.walkAmountRange = 0.3...0.55
+        char3.yOffset = -5
+        char3.characterColor = NSColor(red: 0.6, green: 0.4, blue: 0.8, alpha: 1.0)
+        char3.flipXOffset = -5
+
         char1.providerOverride = .claude
         char2.providerOverride = .codex
+        char3.providerOverride = .gemini
 
-        char1.positionProgress = 0.3
-        char2.positionProgress = 0.7
+        char1.positionProgress = 0.2
+        char2.positionProgress = 0.5
+        char3.positionProgress = 0.8
 
         char1.pauseEndTime = CACurrentMediaTime() + Double.random(in: 0.5...2.0)
         char2.pauseEndTime = CACurrentMediaTime() + Double.random(in: 8.0...14.0)
+        char3.pauseEndTime = CACurrentMediaTime() + Double.random(in: 4.0...8.0)
 
         char1.setup()
         char2.setup()
+        char3.setup()
 
-        characters = [char1, char2]
+        characters = [char1, char2, char3]
         characters.forEach { $0.controller = self }
 
         setupDebugLine()

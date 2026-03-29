@@ -45,6 +45,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         char2Item.state = .on
         menu.addItem(char2Item)
 
+        let char3Item = NSMenuItem(title: "Luna", action: #selector(toggleChar3), keyEquivalent: "3")
+        char3Item.state = .on
+        menu.addItem(char3Item)
+
         menu.addItem(NSMenuItem.separator())
 
         let soundItem = NSMenuItem(title: "Sounds", action: #selector(toggleSounds(_:)), keyEquivalent: "")
@@ -52,7 +56,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(soundItem)
 
         // Per-character provider submenus
-        let charNames = ["Bruce", "Jazz"]
+        let charNames = ["Bruce", "Jazz", "Luna"]
         for (charIdx, charName) in charNames.enumerated() {
             let charProvider = controller?.characters.indices.contains(charIdx) == true
                 ? (controller!.characters[charIdx].providerOverride ?? AgentProvider.current)
@@ -204,6 +208,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func toggleChar2(_ sender: NSMenuItem) {
         guard let chars = controller?.characters, chars.count > 1 else { return }
         let char = chars[1]
+        if char.isManuallyVisible {
+            char.setManuallyVisible(false)
+            sender.state = .off
+        } else {
+            char.setManuallyVisible(true)
+            sender.state = .on
+        }
+    }
+
+    @objc func toggleChar3(_ sender: NSMenuItem) {
+        guard let chars = controller?.characters, chars.count > 2 else { return }
+        let char = chars[2]
         if char.isManuallyVisible {
             char.setManuallyVisible(false)
             sender.state = .off
